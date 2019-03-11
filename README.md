@@ -5,7 +5,7 @@ Listening to music in the shower has become the latest hobby for music enthusias
 This is where ShowerTunes comes in. Using a Metawear device as a humidity sensor in the bathroom, you can reach a baseline with the humidity levels in the bathroom and automatically start your favorite playlist on your Bluetooth speaker. 
 
 ## Project Goals
-* Set up Metawear cpro model to monitor and send humidity levels to a mobile android app
+* Set up Metawear CPRO model to monitor and send humidity levels to a mobile android app
 
 * Design app for android phone to receive humidity information and display in user-friendly interface
 
@@ -42,7 +42,7 @@ The CPRO will act as the humidity sensor to sit in the restroom. The device will
 
 ### Android Application
 
-The Android application will connect via Bluetooth to the CPRO Metawear and generic Bluetooth speaker. The app will also need to have a the Spotify app installed and signed in with user credentials. It will track the humidity levels the CPRO will send, and when levels are past a certain threshold, along with being synced to the Bluetooth speaker, the app will send a signal to the speaker. The signal will tell the Bluetooth speaker to play music from a Spotify playlist of the user's choice (or the last one playing when Spoftify was last opened).
+The Android application will connect via Bluetooth to the CPRO Metawear and generic Bluetooth speaker. The app will also need to have a Spotify app installed and signed in with user credentials. It will track the humidity levels the CPRO will send, and when levels are past a certain threshold, along with being synced to the Bluetooth speaker, the app will send a signal to the speaker. The signal will tell the Bluetooth speaker to play music from a Spotify playlist of the user's choice (or the last one playing when Spotify was last opened).
 
 ### Generic Bluetooth Speaker
 
@@ -54,7 +54,7 @@ The Bluetooth speaker will be the output that presents the ShowerTunes. It will 
 | Component name | Category of vulnerability | Issue Description | Mitigation |
 |----------------|---------------------------|-------------------|------------|
 | CPRO Metawear | something | something | something|
-| Android Application | someting | something | something
+| Android Application | something | something | something
 | Generic Bluetooth Speaker | something | something | something
 
 
