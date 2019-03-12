@@ -66,7 +66,8 @@ The Bluetooth speaker will be the output that presents the ShowerTunes. It will 
 |----------------|---------------------------|-------------------|------------|
 | CPRO Metawear<br> Android Phone/App,<br> Bluetooth Speaker | Eavesdropping | A third party not supposed to be involved in the connection(s) is able to place themselves in the middle and passively watch messages being exchanged. | Ban any devices that use Bluetooth 1.x, 2.0, or 4.0-LE and the devices are using the latest versions and protocols. |
 | Android Phone and Bluetooth Speaker | Man-in-the-Middle Attack | A malicious user can intercept the connection(s) between the Android phone/app and send forged pairing messages. | Update hardware/firmware/software on the android phone to latest standards from the manufacturers. Turn off Bluetooth when not in use.
-| Bluetooth Speaker | Denial of Service | A malicious user can crash and drain the battery of the Bluetooth speaker and block any phone calls via this attack. | Manually turn off Bluetooth when not using it. 
+| Bluetooth Speaker | Denial of Service | A malicious user can crash and drain the battery of the Bluetooth speaker and block any phone calls via this attack. | Manually turn off Bluetooth when not using it. |
+| Metawear CPRO | Information Disclosure | The Metawear device, since it is a 'just works' device, can potentially disclose private information that is visible to others. In this case, the sensor will tell the phone the current humidity in the bathroom. If a third party discovers this, they may pick up when the user is in the bathroom and use this information to break into the user's place of residence. | Try to make connection with Android phone and Metawear device private and secured. Don't let the CPRO be visible to other devices after paired. 
 
 
 
