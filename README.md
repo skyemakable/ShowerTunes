@@ -45,6 +45,7 @@ This is where ShowerTunes comes in. Using a Metawear device as a humidity sensor
         * Manually turn off speaker after each use. 
 
 ## High Level Design
+(Include some pretty design)
 
 ## Component List
 ### CPRO Metawear 
@@ -59,12 +60,11 @@ The Android application will connect via Bluetooth to the CPRO Metawear and gene
 
 The Bluetooth speaker will be the output that presents the ShowerTunes. It will play whatever music is sent to it from the Android phone it is synced to.   
 
-(Include design like somewhere??)
 
 ## Security Analysis
 | Component name | Category of vulnerability | Issue Description | Mitigation |
 |----------------|---------------------------|-------------------|------------|
-| CPRO Metawear, Android Phone/App, Bluetooth Speaker | Eavesdropping | A third party not supposed to be involved in the connection(s) is able to place themselves in the middle and passively watch messages being exchanged. | Ban any devices that use Bluetooth 1.x, 2.0, or 4.0-LE and the devices are using the latest versions and protocols. |
+| CPRO Metawear<br> Android Phone/App,<br> Bluetooth Speaker | Eavesdropping | A third party not supposed to be involved in the connection(s) is able to place themselves in the middle and passively watch messages being exchanged. | Ban any devices that use Bluetooth 1.x, 2.0, or 4.0-LE and the devices are using the latest versions and protocols. |
 | Android Phone and Bluetooth Speaker | Man-in-the-Middle Attack | A malicious user can intercept the connection(s) between the Android phone/app and send forged pairing messages. | Update hardware/firmware/software on the android phone to latest standards from the manufacturers. Turn off Bluetooth when not in use.
 | Bluetooth Speaker | Denial of Service | A malicious user can crash and drain the battery of the Bluetooth speaker and block any phone calls via this attack. | Manually turn off Bluetooth when not using it. 
 
