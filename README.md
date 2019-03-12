@@ -18,20 +18,31 @@ This is where ShowerTunes comes in. Using a Metawear device as a humidity sensor
 ## User Stories
 1. As a music listener, I want to sync with a Bluetooth speaker in the bathroom so I can listen to music while bathing.
 
+    * **Acceptance Criteria:**  
+        *  A user will be able to easily connect to a generic Bluetooth speaker and play their favorite playlist from Spotify on the speaker.
+2. As a passive person, I want to listen to music via my Bluetooth speaker while bathing without having to manually sync everything up beforehand.
     * **Acceptance Criteria:**
-        *  criteria 1
-2. As a passive person, I want to listen to music via my Bluetooth speaker while bathing without having to manually sync everything up beforehand
+        *  A user will be able to play their music on their bluetooth speaker without having to fiddle with their android phone. 
+3. As a stressed individual, I want to listen to music via my Bluetooth speaker while bathing to help relieve stress.
     * **Acceptance Criteria:**
-        *  criteria 1
-3. As a stressed individual, I want to listen to music via my Bluetooth speaker while bathing to help relieve stress
-    * **Acceptance Criteria:**
-        * criteria 1
+        * A user will not need to frustratingly set up and connect their android phone to their speaker beforehand. They may simply just start the water and wait for humidity to rise. 
 
 ## Misuser Stories
-1. As a Bluetooth hacker, I want to force the Bluetooth speaker to play whenever I connect to it so I can make trouble or kill the battery of the speaker for the owner to have to deal with
+1. As a Bluetooth hacker, I want to create a man-in-the-middle attack between the speaker and phone to collect any information I can find. 
     * **Mitigation:**
-        * Manually turn off speaker after each use - this depends on the owner. 
-2. As a 
+        * Manually turn off speaker after each use.
+        * Update all devices to latest manufacturer standards/protocols available
+
+
+2. As a Bluetooth hacker, I want to  eavesdrop between any Bluetooth communications to find potentially vulnerable information. 
+    * **Mitigation:**  
+        * Only use Bluetooth devices that are updated to latest Bluetooth protocols that have handled this issue.
+        * Only have Bluetooth devices turned on when desired
+        * Turn off Bluetooth on Android phone when not using Bluetooth with other devices.  
+
+3. As as prankster, I want to connect to the Bluetooth speaker and mess with the volume settings to cause issues to the victim.
+    * **Mitigation:**
+        * Manually turn off speaker after each use. 
 
 ## High Level Design
 
@@ -53,9 +64,9 @@ The Bluetooth speaker will be the output that presents the ShowerTunes. It will 
 ## Security Analysis
 | Component name | Category of vulnerability | Issue Description | Mitigation |
 |----------------|---------------------------|-------------------|------------|
-| CPRO Metawear | something | something | something|
-| Android Application | something | something | something
-| Generic Bluetooth Speaker | something | something | something
+| CPRO Metawear, Android Phone/App, Bluetooth Speaker | Eavesdropping | A third party not supposed to be involved in the connection(s) is able to place themselves in the middle and passively watch messages being exchanged. | Ban any devices that use Bluetooth 1.x, 2.0, or 4.0-LE and the devices are using the latest versions and protocols. |
+| Android Phone and Bluetooth Speaker | Man-in-the-Middle Attack | A malicious user can intercept the connection(s) between the Android phone/app and send forged pairing messages. | Update hardware/firmware/software on the android phone to latest standards from the manufacturers. Turn off Bluetooth when not in use.
+| Bluetooth Speaker | Denial of Service | A malicious user can crash and drain the battery of the Bluetooth speaker and block any phone calls via this attack. | Manually turn off Bluetooth when not using it. 
 
 
 
