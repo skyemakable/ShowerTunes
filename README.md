@@ -22,7 +22,7 @@ This is where ShowerTunes comes in. Using a Metawear device as a humidity sensor
         *  A user will be able to easily connect to a generic Bluetooth speaker and play their favorite playlist from Spotify on the speaker.
 2. As a passive person, I want to listen to music via my Bluetooth speaker while bathing without having to manually sync everything up beforehand.
     * **Acceptance Criteria:**
-        *  A user will be able to play their music on their bluetooth speaker without having to fiddle with their android phone. 
+        *  A user will be able to play their music on their Bluetooth speaker without having to fiddle with their android phone. 
 3. As a stressed individual, I want to listen to music via my Bluetooth speaker while bathing to help relieve stress.
     * **Acceptance Criteria:**
         * A user will not need to frustratingly set up and connect their android phone to their speaker beforehand. They may simply just start the water and wait for humidity to rise. 
@@ -40,7 +40,7 @@ This is where ShowerTunes comes in. Using a Metawear device as a humidity sensor
         * Only have Bluetooth devices turned on when desired
         * Turn off Bluetooth on Android phone when not using Bluetooth with other devices.  
 
-3. As as prankster, I want to connect to the Bluetooth speaker and mess with the volume settings to cause issues to the victim.
+3. As a prankster, I want to connect to the Bluetooth speaker and mess with the volume settings to cause issues to the victim.
     * **Mitigation:**
         * Manually turn off speaker after each use. 
 
