@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+    <string name="app_name">ShowerTunes</string>
+    <string name="action_settings">Settings</string>
+    <string name="bluetooth">Icon for Bluetooth Speaker</string>
+    <string name="metawear">Icon for Metawear Device</string>
+    <string name="AlbumArt">Area for Album Art of Song Playing</string>
+    <string name="connect">Metawear Connected</string>
+    <string name="bluetoothconnect">Bluetooth Connected</string>
+    <color name="blue">#5471D4</color>
+</resources>

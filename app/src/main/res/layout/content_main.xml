@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/BluetoothSpeaker"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="275dip"
+        android:layout_marginTop="550dip"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/bluetooth"
+        android:scaleType="centerCrop"
+        android:src="@drawable/multimedia" />
+
+    <ImageView
+        android:id="@+id/Metawear"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="25dip"
+        android:layout_marginTop="550dip"
+        android:contentDescription="@string/metawear"
+        android:src="@drawable/design" />
+
+    <ImageView
+        android:layout_width="500dp"
+        android:layout_height="300dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="90dip"
+        android:contentDescription="@string/AlbumArt"
+        android:src="@drawable/album" />
+
+    <TextView
+        android:id="@+id/MetawearText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:layout_marginTop="655dip"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="@string/connect" />
+
+    <TextView
+        android:id="@+id/BluetoothSpeakerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="250dip"
+        android:layout_marginTop="655dip"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="@string/bluetoothconnect" />
+
+
+</RelativeLayout>
