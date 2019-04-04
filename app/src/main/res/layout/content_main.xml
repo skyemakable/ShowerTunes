@@ -10,23 +10,22 @@
         android:id="@+id/BluetoothSpeaker"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
         android:adjustViewBounds="true"
         android:contentDescription="@string/bluetooth"
         android:cropToPadding="true"
         android:scaleType="centerCrop"
         android:src="@drawable/multimedia"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/BluetoothSpeakerText"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteY="509dp" />
 
     <ImageView
         android:id="@+id/Metawear"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="4dp"
         android:contentDescription="@string/metawear"
         android:src="@drawable/design"
         app:layout_constraintBottom_toTopOf="@+id/MetawearText"
@@ -46,26 +45,27 @@
 
     <TextView
         android:id="@+id/MetawearText"
-        android:layout_width="147dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="5dp"
+        android:layout_width="168dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="2dp"
         android:ems="10"
         android:text="@string/connect"
+        android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/BluetoothSpeakerText"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.029"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/BluetoothSpeakerText"
-        android:layout_width="138dp"
-        android:layout_height="22dp"
+        android:layout_width="113dp"
+        android:layout_height="60dp"
         android:layout_marginTop="250dp"
-        android:layout_marginEnd="5dp"
+        android:layout_marginEnd="8dp"
         android:ems="10"
-        android:text="@string/bluetoothconnect"
+        android:text="@string/BluetoothConnect"
+        android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView4" />
@@ -166,6 +166,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_begin="20dp" />
+
+
 
 
 </android.support.constraint.ConstraintLayout>
