@@ -7,5 +7,6 @@
     <string name="AlbumArt">Area for Album Art of Song Playing</string>
     <string name="connect">Metawear Connection</string>
     <string name="BluetoothConnect">Bluetooth Connection</string>
+    <string name="albumPlay">Now Playing...</string>
     <color name="blue">#5471D4</color>
 </resources>
