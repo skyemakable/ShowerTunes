@@ -146,7 +146,7 @@ public class MainActivity extends Activity implements ServiceConnection {
                         source.stream(new Subscriber() {
                             @Override
                             public void apply(Data data, Object ... env) {
-                                MusicText.setText(data.value(Float.class).toString());
+                                Log.i("MainActivity", "Temperature (C) = " + data.value(Float.class));
                             }
                         });
                     }
