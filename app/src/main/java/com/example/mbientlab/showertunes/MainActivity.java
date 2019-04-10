@@ -1,6 +1,7 @@
 package com.example.mbientlab.showertunes;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 
 import com.mbientlab.metawear.Data;
 import com.mbientlab.metawear.MetaWearBoard;
@@ -44,6 +48,8 @@ public class MainActivity extends Activity implements ServiceConnection {
     private Logging logging;
     private BtleService.LocalBinder serviceBinder;
 
+    BluetoothAdapter mBluetoothAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +59,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         Metawear = (ImageView) findViewById(R.id.Metawear);
         BluetoothSpeaker = (ImageView) findViewById(R.id.BluetoothSpeaker);
         AlbumArt = (ImageView) findViewById(R.id.AlbumArt);
+
 
         getApplicationContext().bindService(new Intent(this, BtleService.class),
                 this, Context.BIND_AUTO_CREATE);
@@ -162,23 +169,12 @@ public class MainActivity extends Activity implements ServiceConnection {
         });
     }
 
-    // Look for Bluetooth connection
-    private boolean findBlue() {
-        // boolean blueFound = false;
-
-        // // look for bluetooth speaker
-        // if (!blueFound) {
-        //     // make transparent
-        //     BluetoothSpeaker.setAlpha(0.5f);
-        //     // repeat looking for it?
-        // }
-        // // found bluetooth speaker
-        // else {
-        //     BluetoothSpeaker.setAlpha(1.0f);
-        //     blueFound = true;
-        // }
-
-        // return blueFound;
-        return false;
+    // Make device discoverable? https://stackoverflow.com/questions/46841534/pair-a-bluetooth-device-in-android-studio
+    private void makeDiscoverable() {
+        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+        startActivity(discoverableIntent);
+        Log.i("Log", "Discoverable");
     }
+
 }
