@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -17,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 
@@ -32,13 +34,22 @@ import com.mbientlab.metawear.module.BarometerBosch;
 import com.mbientlab.metawear.module.Logging;
 import com.mbientlab.metawear.module.Temperature;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import bolts.Continuation;
 import bolts.Task;
 
 
 public class MainActivity extends Activity implements ServiceConnection {
 
+    private static final String TAG = "MainActivity";
     private final String MAC_ADDR = "F7:02:E6:49:04:AF";
+    private final String Blu_MAC = "00:58:02:A8:02:44";
+
+    BluetoothAdapter mBluetoothAdapter;
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
@@ -48,22 +59,90 @@ public class MainActivity extends Activity implements ServiceConnection {
     private Logging logging;
     private BtleService.LocalBinder serviceBinder;
 
-    BluetoothAdapter mBluetoothAdapter;
+    // Create a BroadcastReceiver for ACTION_FOUND. Relevant if change of Bluetooth status.
+    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            // When discovery finds a device
+            if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
+
+                switch(state){
+                    case BluetoothAdapter.STATE_OFF:
+                        Log.d(TAG, "onReceive: STATE OFF");
+                        MusicText.setText("Bluetooth Disabled. Please turn on");
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        Log.d(TAG, "mBroadcastReceiver1: STATE ON");;
+                        MusicText.setText("Connecting Devices...");
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
+                        break;
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         MusicText = (TextView) findViewById(R.id.MusicText);
         Metawear = (ImageView) findViewById(R.id.Metawear);
         BluetoothSpeaker = (ImageView) findViewById(R.id.BluetoothSpeaker);
         AlbumArt = (ImageView) findViewById(R.id.AlbumArt);
 
+        // get bluetooth adapter
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        // Relevant when first starting the application
+        if (bluetoothAdapter == null) {
+            // Device does not support Bluetooth
+            Log.d("BluetoothAdapter", "A bluetooth adapter isn't available.");
+        } else {
+            if (!bluetoothAdapter.isEnabled()) {
+                Log.d("BluetoothAdapter", "Bluetooth is not currently enabled");
+                MusicText.setText("Bluetooth Disabled. Please turn on");
+            }
+            else {
+                Log.d("BluetoothAdapter", "Bluetooth enabled. Continuing...");
+                MusicText.setText("Connecting Devices...");
+            }
+        }
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver1, filter);
+
+        /*if (findBlue()) {
+            Log.d("BluetoothSpeaker", "Found the bluetooth speaker");
+        }
+        else {
+            Log.d("BluetoothSpeaker", "Fudge");
+        }
+*/
         getApplicationContext().bindService(new Intent(this, BtleService.class),
             this, Context.BIND_AUTO_CREATE);
+
+
     }
+/*
+    public boolean findBlue() {
+        boolean found = false;
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+        List<String> s = new ArrayList<String>();
+        for (BluetoothDevice bt: pairedDevices) {
+            if (bt.getAddress().equals(Blu_MAC)) {
+                found = true;
+            }
+        }
+        return found;
+    }*/
+
+
 
     @Override
     public void onDestroy() {
@@ -71,6 +150,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // Unbind the service when the activity is destroyed
         getApplicationContext().unbindService(this);
+        unregisterReceiver(mBroadcastReceiver1);
     }
 
     @Override
@@ -93,35 +173,23 @@ public class MainActivity extends Activity implements ServiceConnection {
         //Disconnect device
     }
 
-    // Look for metawear connection and get temperature level
-    // Lines 144 - 156 of freefall
-    private void findMeta() {
-
-        // boolean metaFound = false;
-        // if (!metaFound) {
-        //     // transparent the image, check again?
-        //     Metawear.setAlpha(0.5f);
-        // } else {
-        //     // solid the image.
-        //     Metawear.setAlpha(1.0f);
-        //     // look if we connected to Bluetooth speaker
-        //     boolean blueFound = findBlue();
-        //     // find temperature (in Celsius)
-        //     float temperature_level = 26;
-        //     if (temperature_level >= 26) {
-        //         playMusic();
-        //     }
-        // }
-
-    }
-
     // Play music when meta is found, bluetooth speaker found, and when temperature is high enough
-    private void playMusic() {
+    private void playMusic(String path, String fileName) {
         // play that funky music.
+        MediaPlayer mp = new MediaPlayer();
+
+        try {
+            mp.setDataSource(path + File.separator + fileName);
+            mp.prepare();
+            mp.start();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void retrieveBoard() {
-
 
         // btManager manages bluetooth connection
         final BluetoothManager btManager =
