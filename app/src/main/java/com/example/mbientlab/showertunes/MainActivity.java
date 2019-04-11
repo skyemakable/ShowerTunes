@@ -62,7 +62,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
 
         getApplicationContext().bindService(new Intent(this, BtleService.class),
-                this, Context.BIND_AUTO_CREATE);
+            this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-
+        //Disconnect device
     }
 
     // Look for metawear connection and get temperature level
@@ -122,14 +122,18 @@ public class MainActivity extends Activity implements ServiceConnection {
 
     public void retrieveBoard() {
 
+
         // btManager manages bluetooth connection
         final BluetoothManager btManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         // gets remote device
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(MAC_ADDR);
+        Log.i("Remote device", "remoteDevice is " + remoteDevice.toString());
 
         // create a new Metawear board object for the Bluetooth device
         board = serviceBinder.getMetaWearBoard(remoteDevice);
+        Log.i("MetawearBoard", "board is " + board.getModel());
+        Log.i ("MetawearBoard", String.valueOf(board.isConnected()));
 
         // Establishes a BLE connection to MetaWear board
         board.connectAsync().onSuccess(new Continuation<Void, Void>() {
