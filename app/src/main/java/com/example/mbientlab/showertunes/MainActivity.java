@@ -1,9 +1,12 @@
 package com.example.mbientlab.showertunes;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
@@ -75,7 +78,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         Metawear = (ImageView) findViewById(R.id.Metawear);
         BluetoothSpeaker = (ImageView) findViewById(R.id.BluetoothSpeaker);
         AlbumArt = (ImageView) findViewById(R.id.AlbumArt);
-        mediaPlayer = mediaPlayer.create(getApplicationContext(), R.raw.song);
+        mediaPlayer = mediaPlayer.create(getApplicationContext(), R.raw.song); // TODO: Black Betty by Ram Jam
 
         BluetoothSpeaker.setAlpha(0.1f);
         Metawear.setAlpha(0.1f);
@@ -83,6 +86,11 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // get bluetooth adapter
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice btSpeaker = null;
+
+
+        // Establish connection to the proxy
+        // bluetoothAdapter.getProfileProxy(this, profileListener, BluetoothProfile.A2DP);
 
         // Relevant when first starting the application
         if (bluetoothAdapter == null) {
@@ -100,31 +108,39 @@ public class MainActivity extends Activity implements ServiceConnection {
         //Below is code for checking for changing in Bluetooth (enable/disable)
         IntentFilter changeFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver1, changeFilter);
-        IntentFilter pairedBlueFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        pairedBlueFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
+        IntentFilter pairedBlueFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        pairedBlueFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        pairedBlueFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        registerReceiver(deviceReceiver, pairedBlueFilter);
+
+        // Get arraylist of paired Bluetooth devices
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         boolean found = false;
+
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice d : pairedDevices) {
                 String deviceName = d.getName();
                 String macAddress = d.getAddress();
-                //Log.i("BluetoothDevices", "paired device: " + deviceName + " at " + macAddress);
+                Log.i("BluetoothDevices", "paired device: " + deviceName + " at " + macAddress);
                 if (macAddress.equals(Blu_MAC)) {
-                    Log.i("BluetoothSpeaker", "Found bluetooth speaker with mac Address: " + macAddress);
+                    // Log.i("BluetoothSpeaker", "Found bluetooth speaker with mac Address: " + macAddress);
                     found = true;
+                    btSpeaker = d;
+                    break;
                 }
             }
         }
         if (found) {
-            //registerReceiver(deviceReceiver, pairedBlueFilter);
-            BluetoothSpeaker.setAlpha(1.0f);
-            //probs next check temperature?
-            Metawear.setAlpha(1.0f);
-            MusicText.setText("Regina Spektor - \"Eet\" ");
-            AlbumArt.setImageResource(R.drawable.image);
-            mediaPlayer.start();
-
+            Log.i("BluetoothDevices", "Found speaker: " + btSpeaker.getAddress());
+            //playMusic();
+        }
+        // if not found
+        else {
+            // MusicText.setText("Bluetooth Speaker not found. Turn on and pair speaker");
         }
 
         getApplicationContext().bindService(new Intent(this, BtleService.class),
@@ -139,6 +155,8 @@ public class MainActivity extends Activity implements ServiceConnection {
         // Unbind the service when the activity is destroyed
         getApplicationContext().unbindService(this);
         unregisterReceiver(mBroadcastReceiver1);
+        mediaPlayer.release();
+        mediaPlayer = null;
     }
 
     @Override
@@ -189,23 +207,37 @@ public class MainActivity extends Activity implements ServiceConnection {
         }
     };
 
-
-
-
+    private final BroadcastReceiver deviceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
+                // Get BluetoothDevice object from the intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                Log.d("BluetoothDevice", device.toString());
+                BluetoothSpeaker.setAlpha(1.0f);
+                playMusic();
+//                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//                    Log.d("BluetoothDevice", "Device found");
+//                } else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+//                    Log.d("BluetoothDevice", "Device now connected");
+//                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+//                    Log.d("BluetoothDevice", "Device searching");
+//                } else if (BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED.equals(action)) {
+//                    Log.d("BluetoothDevice", "Device about to disconnect");
+//                } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+//                    Log.d("BluetoothDevice", "Device disconnected");
+//                }
+            }
+        }
+    };
 
     // Play music when meta is found, bluetooth speaker found, and when temperature is high enough
-    private void playMusic(String path, String fileName) {
+    private void playMusic() {
         // play that funky music.
-        MediaPlayer mp = new MediaPlayer();
-
-        try {
-            mp.setDataSource(path + File.separator + fileName);
-            mp.prepare();
-            mp.start();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        MusicText.setText("Regina Spektor - \"Eet\" ");
+        AlbumArt.setImageResource(R.drawable.image);
+        mediaPlayer.start();
 
     }
 
@@ -268,65 +300,4 @@ public class MainActivity extends Activity implements ServiceConnection {
         startActivity(discoverableIntent);
         Log.i("Log", "Discoverable");
     }
-
-    /*
-    private final BroadcastReceiver deviceReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get BluetoothDevice object from the intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    Log.i("BluetoothDevice", "Device found");
-                } else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                    Log.i("BluetoothDevice", "Device now connected");
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    Log.i("BluetoothDevice", "Device searching");
-                } else if (BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED.equals(action)) {
-                    Log.i("BluetoothDevice", "Device about to disconnect");
-                } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
-                    Log.i("BluetoothDevice", "Device disconnected");
-                }
-                if (device.getBondState()==device.BOND_BONDED) {
-                    Log.d("BluetoothSpeaker", device.getName());
-                    BluetoothSocket mSocket=null;
-                    try {
-                        mSocket = device.createInsecureRfcommSocketToServiceRecord(myUUID);
-                    }
-                    catch (IOException e) {
-                        Log.d("BluetoothSpeaker", "socket not created");
-                        e.printStackTrace();
-                    }
-                    try {
-                        mSocket.connect();
-                    }
-                    catch (IOException ee) {
-                        try {
-                            mSocket.close();
-                            Log.d("BluetoothSpeaker", "Cannot connect");
-                        }
-                        catch (IOException eee) {
-                            Log.d("BluetoothSpeaker", "Socket not closed");
-                            eee.printStackTrace();
-                        }
-                    }
-                }
-
-        */
-
-
-/*
-    public boolean findBlue() {
-        boolean found = false;
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-
-        List<String> s = new ArrayList<String>();
-        for (BluetoothDevice bt: pairedDevices) {
-            if (bt.getAddress().equals(Blu_MAC)) {
-                found = true;
-            }
-        }
-        return found;
-    }*/
 }
