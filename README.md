@@ -45,7 +45,7 @@ This is where ShowerTunes comes in. Using a Metawear device as a humidity sensor
         * Manually turn off speaker after each use. 
 
 ## High Level Design
-![Diagram](https://i.imgur.com/q1SZb9D.jpg)
+![Diagram](https://i.imgur.com/6xC0pLY.jpg)
 
 ## Component List
 ### CPRO Metawear 
