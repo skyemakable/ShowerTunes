@@ -20,7 +20,7 @@ This is where ShowerTunes comes in. Using a Metawear device as a temperature sen
 
     * **Acceptance Criteria:**  
         *  A user will be able to easily connect to a generic Bluetooth speaker and play a song on the speaker.
-2. As a passive person, I want to listen to music via my Bluetooth speaker while bathing without having to manually sync everything up beforehand.
+2. As a lazy person, I want to listen to music via my Bluetooth speaker while bathing without having to manually sync everything up beforehand.
     * **Acceptance Criteria:**
         *  A user will be able to play their music on their Bluetooth speaker without having to fiddle with their android phone. 
 3. As a stressed individual, I want to listen to music via my Bluetooth speaker while bathing to help relieve stress.
@@ -67,7 +67,18 @@ The Bluetooth speaker will be the output that presents the ShowerTunes. It will 
 | CPRO Metawear<br> Android Phone/App,<br> Bluetooth Speaker | Eavesdropping | A third party not supposed to be involved in the connection(s) is able to place themselves in the middle and passively watch messages being exchanged. | Ban any devices that use Bluetooth 1.x, 2.0, or 4.0-LE and the devices are using the latest versions and protocols. |
 | Android Phone and Bluetooth Speaker | Man-in-the-Middle Attack | A malicious user can intercept the connection(s) between the Android phone/app and send forged pairing messages. | Update hardware/firmware/software on the android phone to latest standards from the manufacturers. Turn off Bluetooth when not in use.
 | Bluetooth Speaker | Denial of Service | A malicious user can crash and drain the battery of the Bluetooth speaker and block any phone calls via this attack. | Manually turn off Bluetooth when not using it. |
-| Metawear CPRO | Information Disclosure | The Metawear device, since it is a 'just works' device, can potentially disclose private information that is visible to others. In this case, the sensor will tell the phone the current humidity in the bathroom. If a third party discovers this, they may pick up when the user is in the bathroom and use this information to break into the user's place of residence. | Try to make connection with Android phone and Metawear device private and secured. Don't let the CPRO be visible to other devices after paired. 
+| Metawear CPRO | Information Disclosure | The Metawear device, since it is a 'just works' device, can potentially disclose private information that is visible to others. In this case, the sensor will tell the phone the current humidity in the bathroom. If a third party discovers this, they may pick up when the user is in the bathroom and use this information to break into the user's place of residence. | Try to make connection with Android phone and Metawear device private and secured. Don't let the CPRO be visible to other devices after paired.  
+
+## User Story Realization
+* User story 1: "As a music listener, I want to sync with a Bluetooth speaker in the bathroom so I can listen to music while bathing".  
+
+* User story 2: "As a lazy person, I want to listen to music via my Bluetooth speaker while bathing without having to manually sync everything up beforehand"  
+
+* User story 3: "As a stressed individual, I want to listen to music via my Bluetooth speaker while bathing to help relieve stress."  
+
+From the above described user stories, most of the configuration and coding for the Bluetooth speaker has been achieved. This was achieved with libraries such as [BluetoothAdapter](https://developer.android.com/reference/android/bluetooth/BluetoothAdapter), [BluetoothDevice](https://developer.android.com/reference/android/bluetooth/BluetoothDevice), [BluetoothManager](https://developer.android.com/reference/android/bluetooth/BluetoothManager), [BroadcastReceiver](https://developer.android.com/reference/android/content/BroadcastReceiver), and [MediaPlayer](https://developer.android.com/reference/android/media/MediaPlayer) among others. At this time, the metawear portion still needs to be fully written and tested, but the app is at a point where it can fulfill the user stories. Where the app is now, when opened, it will listen and wait for connection with the Bluetooth speaker, and when turned on and connected, will start playing a local song. 
+
+I'm crossing my fingers the demo section goes well. 
 
 
 
