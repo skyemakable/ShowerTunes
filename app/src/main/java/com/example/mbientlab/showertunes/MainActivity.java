@@ -234,6 +234,8 @@ public class MainActivity extends Activity implements ServiceConnection {
             String action = intent.getAction();
             btSpeakerConnect = false;
 
+            Log.d("BluetoothDevice", action);
+
             if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
                 // Get BluetoothDevice object from the intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
