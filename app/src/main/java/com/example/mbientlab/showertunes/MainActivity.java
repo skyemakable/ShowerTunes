@@ -323,8 +323,13 @@ public class MainActivity extends Activity implements ServiceConnection {
                 debug = board.getModule(Debug.class);
                 logging= board.getModule(Logging.class);
 
-                checkDependencies();
+                
             }
+
+            // TODO: put in better place
+            metaConnect = true;
+            checkDependencies();
+            
 
             return null;
         });
