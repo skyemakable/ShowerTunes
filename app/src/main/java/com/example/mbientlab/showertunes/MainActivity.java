@@ -329,7 +329,7 @@ public class MainActivity extends Activity implements ServiceConnection {
             // TODO: put in better place
             metaConnect = true;
             checkDependencies();
-            
+            Metawear.setAlpha(1.0f);
 
             return null;
         });
