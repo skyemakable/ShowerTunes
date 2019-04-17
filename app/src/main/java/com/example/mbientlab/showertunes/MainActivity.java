@@ -123,6 +123,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         // Have filter for connected bluetooth devices and receiver to help look for MAC address of desired speaker
         IntentFilter pairedBlueFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         registerReceiver(deviceReceiver, pairedBlueFilter);
 
         // TODO: remove
@@ -242,6 +243,13 @@ public class MainActivity extends Activity implements ServiceConnection {
                 Log.d("BluetoothDevice", device.toString());
                 BluetoothSpeaker.setAlpha(1.0f);
                 btSpeakerConnect = true;
+            }
+            else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                // Get BluetoothDevice object from the intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                Log.d("BluetoothDevice", device.toString());
+                BluetoothSpeaker.setAlpha(0.1f);
+                btSpeakerConnect = false;
             }
 
             checkDependencies();
