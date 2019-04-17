@@ -1,33 +1,24 @@
 package com.example.mbientlab.showertunes;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Debug;
+//import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-
 
 import com.mbientlab.metawear.Data;
 import com.mbientlab.metawear.MetaWearBoard;
@@ -48,23 +39,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-//import java.util.UUID;
 
 import bolts.Continuation;
 import bolts.Task;
 
 import com.mbientlab.metawear.module.Accelerometer;
+import com.mbientlab.metawear.module.Debug;
 public class MainActivity extends Activity implements ServiceConnection {
 
     private static final String TAG = "MainActivity";
     private final String MAC_ADDR = "F7:02:E6:49:04:AF";
     private final String Blu_MAC = "00:58:02:A8:02:44";
     MediaPlayer mediaPlayer;
+    private final boolean btSpeakerConnect = false;
+    private final boolean metaConnect = false;
 
     BluetoothAdapter mBluetoothAdapter;
     private ArrayList<String> pairedDevices = new ArrayList<String>();
 
-    //private static final java.util.UUID myUUID = UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB");
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
@@ -74,6 +66,8 @@ public class MainActivity extends Activity implements ServiceConnection {
     private Logging logging;
     private BtleService.LocalBinder serviceBinder;
     private Accelerometer accelerometer;
+
+    private Debug debug;
 
     /* onCreate
     * Set up objects for components of app. Set alpha of the metawear icon and speaker icon at low opacity.
@@ -117,6 +111,7 @@ public class MainActivity extends Activity implements ServiceConnection {
             }
         }
         // Below is code for checking for changing in Bluetooth (enable/disable)
+
         IntentFilter changeFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(bluetoothReceiver, changeFilter);
 
@@ -127,25 +122,13 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // Get arraylist of paired Bluetooth devices
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        // Boolean if the speaker we are looking at is found
-        boolean found = false;
 
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice d : pairedDevices) {
                 String deviceName = d.getName();
                 String macAddress = d.getAddress();
                 Log.i("BluetoothDevices", "paired device: " + deviceName + " at " + macAddress);
-                if (macAddress.equals(Blu_MAC)) {
-                    // Log.i("BluetoothSpeaker", "Found bluetooth speaker with mac Address: " + macAddress);
-                    found = true;
-                    btSpeaker = d;
-                    break;
-                }
             }
-        }
-        if (found) {
-            Log.i("BluetoothDevices", "Found speaker: " + btSpeaker.getAddress());
-            //playMusic();
         }
         // Metawear API
         getApplicationContext().bindService(new Intent(this, BtleService.class),
@@ -176,15 +159,15 @@ public class MainActivity extends Activity implements ServiceConnection {
         // Typecast the binder to the service's LocalBinder class
         serviceBinder = (BtleService.LocalBinder) service;
         Log.i("metawear", serviceBinder.toString());
-        Log.i("Metawear", "Service Connected");
+        // Log.i("Metawear", "Service Connected");
 
         // mac addr here for metawear device
-        try {
-            retrieveBoard();
-        }
-        catch (Exception ex){
-            Log.d("ShowerTunes", "Failed to retieveboard" + ex.getMessage());
-        }
+//        try {
+//            retrieveBoard(MAC_ADDR);
+//        }
+//        catch (Exception ex){
+//            Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
+//        }
     }
 
     @Override
@@ -237,42 +220,65 @@ public class MainActivity extends Activity implements ServiceConnection {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
                 BluetoothSpeaker.setAlpha(1.0f);
-                // TODO: call metawear api to get values
-                playMusic();
+
+
             }
         }
     };
 
+    // Function to check btSpeaker and metawear are connected
+    private void checkDependencies() {
+        // If both are connected, play music.
+        if (btSpeakerConnect && metaConnect) {
+            toggleMusic(true);
+        }
+        else {
+            toggleMusic(false);
+        }
+    }
+
     /*
-    * playMusic called when Bluetooth speaker connected and (when written correctly)  metawear detects
+    * toggleMusic called when Bluetooth speaker connected and (when written correctly)  metawear detects
     * above required threshold in temperature. Makes edit in music text and image, and starts song.
-     */
-    private void playMusic() {
+    */
+    private void toggleMusic(boolean setToggle) {
         // play that funky music.
         MusicText.setText("Regina Spektor - \"Eet\" ");
         AlbumArt.setImageResource(R.drawable.image);
-        mediaPlayer.start();
 
+        // If either disonnect, or metawear gets below certain threshold, stop.
+
+        if (setToggle && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+        else {
+            mediaPlayer.stop();
+        }
     }
     /* retrieveBoard
     *  Get board information, do the binding, get temperature data. Will add more comments when it works.
-     */
-    public void retrieveBoard() {
+    */
+    public void retrieveBoard(String MAC_ADDR) {
 
         // btManager manages bluetooth connection
         final BluetoothManager btManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         // gets remote device
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(MAC_ADDR);
-        Log.i("Remote device", "remoteDevice is " + remoteDevice.toString());
-
+        // Log.i("MetawearBoard", "remoteDevice is " + remoteDevice.toString());
+        String LOG_TAG = "callbackAccelerometer";
         // create a new Metawear board object for the Bluetooth device
         board = serviceBinder.getMetaWearBoard(remoteDevice);
-        Log.i("MetawearBoard", "in Retrieve Board: before getModel() call");
-        Log.i("MetawearBoard", String.valueOf(board.isConnected()));
+//        Log.i("MetawearBoard", "in Retrieve Board: before getModel() call");
+//        Log.i("MetawearBoard", board.getModel().toString());
+//        Log.i("MetawearBoard", "in Retrieve Board: after getModel() call");
+        Log.i("MetawearBoard", "Is board connected? (T/F): " + String.valueOf(board.isConnected()));
+
+        // This section of text is for testing with accelerometer sensor
         board.connectAsync().onSuccessTask(task -> {
-            String LOG_TAG = "callback-for-accelerometer";
+            Log.i("MetawearBoard", "I made it this far");
             accelerometer = board.getModule(Accelerometer.class);
+
             accelerometer.configure()
                     .odr(50f)
                     .commit();
@@ -293,54 +299,55 @@ public class MainActivity extends Activity implements ServiceConnection {
 
             return null;
         });
-        /*if(board.getModel()!=null){
-
-            Log.i("MetawearBoard", "board is " + String.valueOf(board.getModel()));
-        }
-        else{
-            Log.i("MetawearBoard", "board is null");
-        }*/
-
-        //Log.i ("MetawearBoard", String.valueOf(board.isConnected()));
-        //Log.i("MetawearBoard", "in Retrieve Board after getModel() call");
-
-        // Establishes a BLE connection to MetaWear board
-        /*board.connectAsync().onSuccessTask(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task <Void> task) throws Exception {
-                Log.i("showerTunes", task.toString());
-                Log.i("ShowerTunes", "Connected to " + MAC_ADDR);
-
-                /*logging = board.getModule(Logging.class);
-
-                // create a reference to the temperature sensor on the board
-                final Temperature temp = board.getModule(Temperature.class);
-
-                final Temperature.Sensor tempSensor = temp.findSensors(Temperature.SensorType.PRESET_THERMISTOR)[0];
-
-                board.getModule(BarometerBosch.class).start();
-                temp.findSensors(Temperature.SensorType.BOSCH_ENV)[0].read();
-
-                tempSensor.addRouteAsync(new RouteBuilder() {
-                    @Override
-                    public void configure(RouteComponent source) {
-                        source.stream(new Subscriber() {
-                            @Override
-                            public void apply(Data data, Object ... env) {
-                                Log.i("MainActivity", "Temperature (C) = " + data.value(Float.class));
-                            }
-                        });
-                    }
-                }).continueWith(new Continuation<Route, Void>() {
-                    @Override
-                    public Void then(Task<Route> task) throws Exception {
-                        tempSensor.read();
-                        return null;
-                    }
-                });
-                return null;
-            }
-        }); */
+//The other one
+//        if(board.getModel()!=null){
+//
+//            Log.i("MetawearBoard", "board is " + String.valueOf(board.getModel()));
+//        }
+//        else{
+//            Log.i("MetawearBoard", "board is null");
+//        }
+//
+//        //Log.i ("MetawearBoard", String.valueOf(board.isConnected()));
+//        //Log.i("MetawearBoard", "in Retrieve Board after getModel() call");
+//
+//        // Establishes a BLE connection to MetaWear board
+//        board.connectAsync().onSuccessTask(task -> {
+//            @Override
+//            public Void then(Task <Void> task) throws Exception {
+//                Log.i("ShowerTunes", task.toString());
+//                Log.i("ShowerTunes", "Connected to " + MAC_ADDR);
+//
+//                logging = board.getModule(Logging.class);
+//
+//                // create a reference to the temperature sensor on the board
+//                final Temperature temp = board.getModule(Temperature.class);
+//
+//                final Temperature.Sensor tempSensor = temp.findSensors(Temperature.SensorType.PRESET_THERMISTOR)[0];
+//
+//                board.getModule(BarometerBosch.class).start();
+//                temp.findSensors(Temperature.SensorType.BOSCH_ENV)[0].read();
+//
+//                tempSensor.addRouteAsync(new RouteBuilder() {
+//                    @Override
+//                    public void configure(RouteComponent source) {
+//                        source.stream(new Subscriber() {
+//                            @Override
+//                            public void apply(Data data, Object ... env) {
+//                                Log.i("MainActivity", "Temperature (C) = " + data.value(Float.class));
+//                            }
+//                        });
+//                    }
+//                }).continueWith(new Continuation<Route, Void>() {
+//                    @Override
+//                    public Void then(Task<Route> task) throws Exception {
+//                        tempSensor.read();
+//                        return null;
+//                    }
+//                });
+//                return null;
+//            }
+//        });
     }
 
 }
