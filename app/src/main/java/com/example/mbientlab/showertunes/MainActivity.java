@@ -48,8 +48,9 @@ import com.mbientlab.metawear.module.Debug;
 public class MainActivity extends Activity implements ServiceConnection {
 
     private static final String TAG = "MainActivity";
-    private final String MAC_ADDR = "F7:02:E6:49:04:AF";
-    private final String Blu_MAC = "00:58:02:A8:02:44";
+    private final String META_ADDR = "F7:02:E6:49:04:AF";
+    private final String SPEAKER_ADDR = "00:58:02:A8:02:44";
+    private final BluetoothManager btManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
@@ -129,6 +130,8 @@ public class MainActivity extends Activity implements ServiceConnection {
         // TODO: remove
         //pairedDevices = new ArrayList<String>();
 
+        BluetoothDevice fooSpeaker = btManager.getAdapter().getRemoteDevice(SPEAKER_ADDR);
+
         // Get arraylist of paired Bluetooth devices
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
@@ -172,7 +175,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // mac addr here for metawear device
         // try {
-        //     retrieveBoard(MAC_ADDR);
+        //     retrieveBoard(META_ADDR);
         // }
         // catch (Exception ex){
         //     Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
@@ -293,13 +296,13 @@ public class MainActivity extends Activity implements ServiceConnection {
     /** retrieveBoard
      *  Get board information, do the binding, get temperature data. Will add more comments when it works.
      */
-    public void retrieveBoard(String MAC_ADDR) {
+    public void retrieveBoard(String META_ADDR) {
         // btManager manages bluetooth connection
-        final BluetoothManager btManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        // final BluetoothManager btManager =
+        //         (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
         // gets remote device
-        final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(MAC_ADDR);
+        final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(META_ADDR);
 
         // Log.i("MetawearBoard", "remoteDevice is " + remoteDevice.toString());
         String LOG_TAG = "callbackAccelerometer";
@@ -360,7 +363,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 //            @Override
 //            public Void then(Task <Void> task) throws Exception {
 //                Log.i("ShowerTunes", task.toString());
-//                Log.i("ShowerTunes", "Connected to " + MAC_ADDR);
+//                Log.i("ShowerTunes", "Connected to " + META_ADDR);
 //
 //                logging = board.getModule(Logging.class);
 //
