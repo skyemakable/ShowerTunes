@@ -5,22 +5,19 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 //import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
 
 import com.mbientlab.metawear.Data;
 import com.mbientlab.metawear.MetaWearBoard;
@@ -36,14 +33,14 @@ import com.mbientlab.metawear.module.BarometerBosch;
 import com.mbientlab.metawear.module.Logging;
 import com.mbientlab.metawear.module.Temperature;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+//import java.io.File;
+//import java.io.IOException;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.Set;
 
 import bolts.Continuation;
-import bolts.Task;
+
 
 import com.mbientlab.metawear.module.Accelerometer;
 import com.mbientlab.metawear.module.Debug;
@@ -132,9 +129,6 @@ public class MainActivity extends Activity implements ServiceConnection {
         getApplicationContext().bindService(new Intent(this, BtleService.class),
                 this, Context.BIND_AUTO_CREATE);
 
-        // TODO: remove
-        retrieveBoard("");
-
         // Now that everything is ready, check if everything is active
         checkDependencies();
     }
@@ -163,19 +157,17 @@ public class MainActivity extends Activity implements ServiceConnection {
         // Typecast the binder to the service's LocalBinder class
         serviceBinder = (BtleService.LocalBinder) service;
         Log.i("metawear", serviceBinder.toString());
-        // Log.i("Metawear", "Service Connected");
 
-        // mac addr here for metawear device
-        // try {
-        //    retrieveBoard(META_ADDR);
-        // }
-        // catch (Exception ex){
-        //     Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
-        // }
+         try {
+            retrieveBoard(META_ADDR);
+         }
+         catch (Exception ex){
+             Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
+         }
     }
 
     /**
-     * 
+     * onServiceDisconnected: Disconnect devices. This in tutorials was always kinda left blank so I'm sticking with that.
      */
     @Override
     public void onServiceDisconnected(ComponentName name) {
@@ -280,11 +272,8 @@ public class MainActivity extends Activity implements ServiceConnection {
      * song when parameters are not met. 
      */
     private void toggleMusic(boolean setToggle) {
-        // play that funky music.
         MusicText.setText("Regina Spektor - \"Eet\" ");
         AlbumArt.setImageResource(R.drawable.image);
-
-        // If either disonnect, or metawear gets below certain threshold, stop.
 
         if (setToggle) {
 
@@ -314,6 +303,7 @@ public class MainActivity extends Activity implements ServiceConnection {
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
         // gets remote device
+        Log.i("bluetooth", "Getting remote device: " + btManager.getAdapter().getRemoteDevice(META_ADDR).toString());
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(META_ADDR);
 
         // Log.i("MetawearBoard", "remoteDevice is " + remoteDevice.toString());
@@ -348,9 +338,8 @@ public class MainActivity extends Activity implements ServiceConnection {
                 debug = board.getModule(Debug.class);
                 logging= board.getModule(Logging.class);
 
-                
-            }
 
+            }
             return null;
         });
 //The other one
