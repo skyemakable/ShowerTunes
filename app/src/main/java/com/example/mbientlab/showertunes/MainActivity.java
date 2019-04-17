@@ -3,7 +3,9 @@ package com.example.mbientlab.showertunes;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
@@ -50,7 +52,6 @@ public class MainActivity extends Activity implements ServiceConnection {
     private static final String TAG = "MainActivity";
     private final String META_ADDR = "F7:02:E6:49:04:AF";
     private final String SPEAKER_ADDR = "00:58:02:A8:02:44";
-    private final BluetoothManager btManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
@@ -114,7 +115,8 @@ public class MainActivity extends Activity implements ServiceConnection {
             MusicText.setText("Connecting Devices...");
             btActive = true;
 
-            checkDependencies();
+            // Check if a headset is connected
+            btSpeakerConnect = bluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED;
         }
 
         // Below is code for checking state changes to Bluetooth (enable/disable)
@@ -122,30 +124,19 @@ public class MainActivity extends Activity implements ServiceConnection {
         registerReceiver(bluetoothReceiver, changeFilter);
 
         // Have filter for connected bluetooth devices and receiver to help look for MAC address of desired speaker
-        IntentFilter pairedBlueFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        IntentFilter pairedBlueFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
         pairedBlueFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         registerReceiver(deviceReceiver, pairedBlueFilter);
-
-        // TODO: remove
-        //pairedDevices = new ArrayList<String>();
-
-        BluetoothDevice fooSpeaker = btManager.getAdapter().getRemoteDevice(SPEAKER_ADDR);
-
-        // Get arraylist of paired Bluetooth devices
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice d : pairedDevices) {
-                String deviceName = d.getName();
-                String macAddress = d.getAddress();
-                Log.i("BluetoothDevices", "paired device: " + deviceName + " at " + macAddress);
-            }
-        }
 
         // Metawear API
         getApplicationContext().bindService(new Intent(this, BtleService.class),
                 this, Context.BIND_AUTO_CREATE);
+
+        // TODO: remove
+        retrieveBoard("");
+
+        // Now that everything is ready, check if everything is active
+        checkDependencies();
     }
 
     /** onDestroy
@@ -159,6 +150,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         getApplicationContext().unbindService(this);
         unregisterReceiver(bluetoothReceiver);
         unregisterReceiver(deviceReceiver);
+        mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
     }
@@ -175,7 +167,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // mac addr here for metawear device
         // try {
-        //     retrieveBoard(META_ADDR);
+        //    retrieveBoard(META_ADDR);
         // }
         // catch (Exception ex){
         //     Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
@@ -244,14 +236,12 @@ public class MainActivity extends Activity implements ServiceConnection {
                 // Get BluetoothDevice object from the intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
-                BluetoothSpeaker.setAlpha(1.0f);
                 btSpeakerConnect = true;
             }
             else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 // Get BluetoothDevice object from the intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
-                BluetoothSpeaker.setAlpha(0.1f);
                 btSpeakerConnect = false;
             }
 
@@ -260,15 +250,26 @@ public class MainActivity extends Activity implements ServiceConnection {
     };
 
     /**
-     * 
+     * checkDependencies checks if we have all our requirements set. If we do, we call upon toggleMusic
      */
     private void checkDependencies() {
+        if (!btSpeakerConnect || !btActive)
+        {
+            BluetoothSpeaker.setAlpha(0.1f);
+        }
+        else
+        {
+            BluetoothSpeaker.setAlpha(1.0f);
+        }
+
         // Function to check btSpeaker and metawear are connected
         // If both are connected, play music.
         if (btActive && btSpeakerConnect && metaConnect) {
+            Log.d("Play","Yep");
             toggleMusic(true);
         }
         else {
+            Log.d("Play","Nope");
             toggleMusic(false);
         }
     }
@@ -285,11 +286,14 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // If either disonnect, or metawear gets below certain threshold, stop.
 
-        if (setToggle && !mediaPlayer.isPlaying()) {
+        if (setToggle) {
+
             mediaPlayer.start();
+            Log.d("Play start", "Yeeeeeeettttthhhhh");
         }
         else {
-            mediaPlayer.stop();
+            // mediaPlayer.stop();
+            if (mediaPlayer.isPlaying()) mediaPlayer.pause();
         }
     }
 
@@ -297,9 +301,17 @@ public class MainActivity extends Activity implements ServiceConnection {
      *  Get board information, do the binding, get temperature data. Will add more comments when it works.
      */
     public void retrieveBoard(String META_ADDR) {
+        // TODO: put in better place
+        metaConnect = true;
+        checkDependencies();
+        Metawear.setAlpha(1.0f);
+
+        // TODO: remove early return
+        if (true) return;
+
         // btManager manages bluetooth connection
-        // final BluetoothManager btManager =
-        //         (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        final BluetoothManager btManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
         // gets remote device
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(META_ADDR);
@@ -338,11 +350,6 @@ public class MainActivity extends Activity implements ServiceConnection {
 
                 
             }
-
-            // TODO: put in better place
-            metaConnect = true;
-            checkDependencies();
-            Metawear.setAlpha(1.0f);
 
             return null;
         });
