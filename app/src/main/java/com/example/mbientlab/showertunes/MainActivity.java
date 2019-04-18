@@ -272,17 +272,22 @@ public class MainActivity extends Activity implements ServiceConnection {
      * song when parameters are not met. 
      */
     private void toggleMusic(boolean setToggle) {
-        MusicText.setText("Regina Spektor - \"Eet\" ");
-        AlbumArt.setImageResource(R.drawable.image);
+
 
         if (setToggle) {
 
             mediaPlayer.start();
             Log.d("Play start", "Yeeeeeeettttthhhhh");
+            MusicText.setText("Regina Spektor - \"Eet\" ");
+            AlbumArt.setImageResource(R.drawable.image);
         }
         else {
             // mediaPlayer.stop();
-            if (mediaPlayer.isPlaying()) mediaPlayer.pause();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                MusicText.setText("Connecting devices...");
+                AlbumArt = (ImageView) findViewById(R.id.AlbumArt);
+            }
         }
     }
 
@@ -290,13 +295,13 @@ public class MainActivity extends Activity implements ServiceConnection {
      *  Get board information, do the binding, get temperature data. Will add more comments when it works.
      */
     public void retrieveBoard(String META_ADDR) {
-        // TODO: put in better place
-        metaConnect = true;
-        checkDependencies();
-        Metawear.setAlpha(1.0f);
-
-        // TODO: remove early return
-        if (true) return;
+//        // TODO: put in better place
+//        metaConnect = true;
+//        checkDependencies();
+//        Metawear.setAlpha(1.0f);
+//
+//        // TODO: remove early return
+//        if (true) return;
 
         // btManager manages bluetooth connection
         final BluetoothManager btManager =
