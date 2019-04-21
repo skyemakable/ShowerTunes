@@ -312,7 +312,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         board.connectAsync().onSuccessTask(task1 -> {
             tempModule = board.getModule(Temperature.class);
             final Temperature.Sensor tempSensor = tempModule.sensors()[0];
-
+            //addrouteasync fails
             tempSensor.addRouteAsync(source -> source.stream((data, env) -> {
                 final Float celsius = data.value(Float.class);
                 Log.i(LOG_TAG, "Temperature (C) = " + celsius);
