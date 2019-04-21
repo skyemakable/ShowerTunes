@@ -26,6 +26,7 @@ import com.mbientlab.metawear.Subscriber;
 import com.mbientlab.metawear.android.BtleService;
 import com.mbientlab.metawear.builder.RouteBuilder;
 import com.mbientlab.metawear.builder.RouteComponent;
+
 import com.mbientlab.metawear.builder.filter.Comparison;
 import com.mbientlab.metawear.builder.filter.ThresholdOutput;
 import com.mbientlab.metawear.builder.function.Function1;
@@ -36,6 +37,7 @@ import com.mbientlab.metawear.module.Temperature.SensorType;
 
 
 import bolts.Continuation;
+import bolts.Task;
 
 
 import com.mbientlab.metawear.module.Accelerometer;
@@ -55,7 +57,6 @@ public class MainActivity extends Activity implements ServiceConnection {
     private BtleService.LocalBinder serviceBinder;
     private BluetoothAdapter mBluetoothAdapter;
     private MetaWearBoard board;
-    private Accelerometer accelerometer; //TODO: Get rid of
     private Temperature tempModule;
 
     private boolean btActive;
@@ -161,6 +162,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         try {
             retrieveBoard(META_ADDR);
+
         } catch (Exception ex) {
             Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
         }
@@ -198,7 +200,6 @@ public class MainActivity extends Activity implements ServiceConnection {
                         break;
                     case BluetoothAdapter.STATE_ON:
                         Log.d(TAG, "bluetoothReceiver: STATE ON");
-                        ;
                         MusicText.setText("Connecting Devices...");
                         btActive = true;
                         break;
@@ -246,14 +247,11 @@ public class MainActivity extends Activity implements ServiceConnection {
      */
     private void checkDependencies() {
         //Check Bluetooth
-//        if (!btSpeakerConnect || !btActive )
-//        {
-//            BluetoothSpeaker.setAlpha(0.1f);
-//        }
-//        else
-//        {
-//            BluetoothSpeaker.setAlpha(1.0f);
-//        }
+        if (!btSpeakerConnect || !btActive) {
+            BluetoothSpeaker.setAlpha(0.1f);
+        } else {
+            BluetoothSpeaker.setAlpha(1.0f);
+        }
         // Check Metawear
         if (!metaConnect) {
             Metawear.setAlpha(0.1f);
@@ -311,26 +309,18 @@ public class MainActivity extends Activity implements ServiceConnection {
         // create a new Metawear board object for the Bluetooth device
         board = serviceBinder.getMetaWearBoard(remoteDevice);
 
-
-        // This section of text is for testing with accelerometer sensor
         board.connectAsync().onSuccessTask(task1 -> {
-            // accelerometer = board.getModule(Accelerometer.class);
             tempModule = board.getModule(Temperature.class);
             final Temperature.Sensor tempSensor = tempModule.sensors()[0];
 
-            return tempSensor.addRouteAsync(new RouteBuilder() {
-                @Override
-                public void configure(RouteComponent source) {
-                    source.stream(new Subscriber() {
-                        @Override
-                        public void apply(Data data, Object... env) {
-                            Log.i("MainActivity", "Temperature (C) = " + data.value(Float.class));
-                        }
-                    });
-                }
-            }).continueWith((Continuation<Route, Void>) task2 -> {
-                if (task1.isFaulted()) {
-                    Log.e(LOG_TAG, board.isConnected() ? "Error setting up route" : "Error connecting", task1.getError());
+            tempSensor.addRouteAsync(source -> source.stream((data, env) -> {
+                final Float celsius = data.value(Float.class);
+                Log.i(LOG_TAG, "Temperature (C) = " + celsius);
+
+            })).continueWithTask(task -> {
+                //streamRoute = task.getResult();
+                if (task.isFaulted()) {
+                    Log.e(LOG_TAG, board.isConnected() ? "Error setting up route" : "Error connecting", task.getError());
                 } else {
                     Log.i(LOG_TAG, "Connected");
                     metaConnect = true;
@@ -338,9 +328,12 @@ public class MainActivity extends Activity implements ServiceConnection {
                     logging = board.getModule(Logging.class);
                     checkDependencies();
                 }
+
                 return null;
             });
+            return null;
         });
     }
 }
+
 
