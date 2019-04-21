@@ -59,7 +59,8 @@ public class MainActivity extends Activity implements ServiceConnection {
     private BtleService.LocalBinder serviceBinder;
     private BluetoothAdapter mBluetoothAdapter;
     private MetaWearBoard board;
-    private Accelerometer accelerometer;
+    private Accelerometer accelerometer; //TODO: Get rid of
+    private Temperature temperature;
 
     private boolean btActive;
     private boolean btSpeakerConnect;
@@ -246,13 +247,21 @@ public class MainActivity extends Activity implements ServiceConnection {
      * checkDependencies checks if we have all our requirements set. If we do, we call upon toggleMusic
      */
     private void checkDependencies() {
-        if (!btSpeakerConnect || !btActive)
-        {
-            BluetoothSpeaker.setAlpha(0.1f);
+        //Check Bluetooth
+//        if (!btSpeakerConnect || !btActive )
+//        {
+//            BluetoothSpeaker.setAlpha(0.1f);
+//        }
+//        else
+//        {
+//            BluetoothSpeaker.setAlpha(1.0f);
+//        }
+        // Check Metawear
+        if (!metaConnect) {
+            Metawear.setAlpha(0.1f);
         }
-        else
-        {
-            BluetoothSpeaker.setAlpha(1.0f);
+        else {
+            Metawear.setAlpha(1.0f);
         }
 
         // Function to check btSpeaker and metawear are connected
@@ -309,6 +318,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         // This section of text is for testing with accelerometer sensor
         board.connectAsync().onSuccessTask(task -> {
             accelerometer = board.getModule(Accelerometer.class);
+            //temperature = board.getModule(Temperature.class);
 
             accelerometer.configure()
                     .odr(50f)
@@ -324,10 +334,10 @@ public class MainActivity extends Activity implements ServiceConnection {
                 Log.e(LOG_TAG, board.isConnected() ? "Error setting up route" : "Error connecting", task.getError());
             } else {
                 Log.i(LOG_TAG, "Connected");
+                metaConnect = true;
                 debug = board.getModule(Debug.class);
                 logging= board.getModule(Logging.class);
-
-
+                checkDependencies();
             }
             return null;
         });
