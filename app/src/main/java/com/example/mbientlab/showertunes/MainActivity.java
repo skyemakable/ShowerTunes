@@ -32,12 +32,8 @@ import com.mbientlab.metawear.builder.function.Function1;
 import com.mbientlab.metawear.module.BarometerBosch;
 import com.mbientlab.metawear.module.Logging;
 import com.mbientlab.metawear.module.Temperature;
+import com.mbientlab.metawear.module.Temperature.SensorType;
 
-//import java.io.File;
-//import java.io.IOException;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Set;
 
 import bolts.Continuation;
 
@@ -60,7 +56,7 @@ public class MainActivity extends Activity implements ServiceConnection {
     private BluetoothAdapter mBluetoothAdapter;
     private MetaWearBoard board;
     private Accelerometer accelerometer; //TODO: Get rid of
-    private Temperature temperature;
+    private Temperature tempModule;
 
     private boolean btActive;
     private boolean btSpeakerConnect;
@@ -69,7 +65,8 @@ public class MainActivity extends Activity implements ServiceConnection {
     private Logging logging;
     private Debug debug;
 
-    /** onCreate
+    /**
+     * onCreate
      * Set up objects for components of app. Set alpha of the metawear icon and speaker icon at low opacity.
      * Get blueTooth adapter
      * At startup, check if Bluetooth is on on the android phone. Display appropriate message.
@@ -134,7 +131,8 @@ public class MainActivity extends Activity implements ServiceConnection {
         checkDependencies();
     }
 
-    /** onDestroy
+    /**
+     * onDestroy
      * Unbind services, unregister receivers, and release the mediaPlayer
      */
     @Override
@@ -150,7 +148,8 @@ public class MainActivity extends Activity implements ServiceConnection {
         mediaPlayer = null;
     }
 
-    /** onServiceConnected
+    /**
+     * onServiceConnected
      * Binding for metawear api, and call retrieveBoard to get board and startup more metawear tasks/functions
      */
     @Override
@@ -160,12 +159,11 @@ public class MainActivity extends Activity implements ServiceConnection {
         serviceBinder = (BtleService.LocalBinder) service;
         Log.i("metawear", serviceBinder.toString());
 
-         try {
+        try {
             retrieveBoard(META_ADDR);
-         }
-         catch (Exception ex){
-             Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
-         }
+        } catch (Exception ex) {
+            Log.d("ShowerTunes", "Failed to retieveboard: " + ex.getMessage());
+        }
     }
 
     /**
@@ -188,7 +186,7 @@ public class MainActivity extends Activity implements ServiceConnection {
             if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
 
-                switch(state){
+                switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         Log.d(TAG, "onReceive: STATE OFF");
                         MusicText.setText("Bluetooth Disabled\nPlease turn on");
@@ -199,7 +197,8 @@ public class MainActivity extends Activity implements ServiceConnection {
                         btActive = false;
                         break;
                     case BluetoothAdapter.STATE_ON:
-                        Log.d(TAG, "bluetoothReceiver: STATE ON");;
+                        Log.d(TAG, "bluetoothReceiver: STATE ON");
+                        ;
                         MusicText.setText("Connecting Devices...");
                         btActive = true;
                         break;
@@ -231,8 +230,7 @@ public class MainActivity extends Activity implements ServiceConnection {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
                 btSpeakerConnect = true;
-            }
-            else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 // Get BluetoothDevice object from the intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
@@ -259,19 +257,17 @@ public class MainActivity extends Activity implements ServiceConnection {
         // Check Metawear
         if (!metaConnect) {
             Metawear.setAlpha(0.1f);
-        }
-        else {
+        } else {
             Metawear.setAlpha(1.0f);
         }
 
         // Function to check btSpeaker and metawear are connected
         // If both are connected, play music.
         if (btActive && btSpeakerConnect && metaConnect) {
-            Log.d("Play","Yep");
+            Log.d("Play", "Yep");
             toggleMusic(true);
-        }
-        else {
-            Log.d("Play","Nope");
+        } else {
+            Log.d("Play", "Nope");
             toggleMusic(false);
         }
     }
@@ -279,7 +275,7 @@ public class MainActivity extends Activity implements ServiceConnection {
     /**
      * toggleMusic called when Bluetooth speaker connected and (when written correctly)  metawear detects
      * above required threshold in temperature. Makes edit in music text and image, and starts song. Will stop
-     * song when parameters are not met. 
+     * song when parameters are not met.
      */
     private void toggleMusic(boolean setToggle) {
 
@@ -288,8 +284,7 @@ public class MainActivity extends Activity implements ServiceConnection {
             AlbumArt.setImageResource(R.drawable.image);
             mediaPlayer.start();
             Log.d("Play start", "Yeeeeeeettttthhhhh");
-        }
-        else {
+        } else {
             // mediaPlayer.stop();
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
@@ -297,8 +292,9 @@ public class MainActivity extends Activity implements ServiceConnection {
         }
     }
 
-    /** retrieveBoard
-     *  Get board information, do the binding, get temperature data. Will add more comments when it works.
+    /**
+     * retrieveBoard
+     * Get board information, do the binding, get temperature data. Will add more comments when it works.
      */
     public void retrieveBoard(String META_ADDR) {
         // btManager manages bluetooth connection
@@ -310,86 +306,41 @@ public class MainActivity extends Activity implements ServiceConnection {
         final BluetoothDevice remoteDevice = btManager.getAdapter().getRemoteDevice(META_ADDR);
 
         // Log.i("MetawearBoard", "remoteDevice is " + remoteDevice.toString());
-        String LOG_TAG = "callbackAccelerometer";
+        String LOG_TAG = "callbackTemperature";
 
         // create a new Metawear board object for the Bluetooth device
         board = serviceBinder.getMetaWearBoard(remoteDevice);
 
+
         // This section of text is for testing with accelerometer sensor
-        board.connectAsync().onSuccessTask(task -> {
-            accelerometer = board.getModule(Accelerometer.class);
-            //temperature = board.getModule(Temperature.class);
+        board.connectAsync().onSuccessTask(task1 -> {
+            // accelerometer = board.getModule(Accelerometer.class);
+            tempModule = board.getModule(Temperature.class);
+            final Temperature.Sensor tempSensor = tempModule.sensors()[0];
 
-            accelerometer.configure()
-                    .odr(50f)
-                    .commit();
-            return accelerometer.acceleration().addRouteAsync(source ->
-                    source.map(Function1.RSS).lowpass((byte) 4).filter(ThresholdOutput.BINARY, 0.5f)
-                            .multicast()
-                            .to().filter(Comparison.EQ, -1).log((data, env) -> Log.i(LOG_TAG, data.formattedTimestamp() + ": Entered Free Fall"))
-                            .to().filter(Comparison.EQ, 1).log((data, env) -> Log.i(LOG_TAG, data.formattedTimestamp() + ": Left Free Fall"))
-                            .end());
-        }).continueWith((Continuation<Route, Void>) task -> {
-            if (task.isFaulted()) {
-                Log.e(LOG_TAG, board.isConnected() ? "Error setting up route" : "Error connecting", task.getError());
-            } else {
-                Log.i(LOG_TAG, "Connected");
-                metaConnect = true;
-                debug = board.getModule(Debug.class);
-                logging= board.getModule(Logging.class);
-                checkDependencies();
-            }
-            return null;
+            return tempSensor.addRouteAsync(new RouteBuilder() {
+                @Override
+                public void configure(RouteComponent source) {
+                    source.stream(new Subscriber() {
+                        @Override
+                        public void apply(Data data, Object... env) {
+                            Log.i("MainActivity", "Temperature (C) = " + data.value(Float.class));
+                        }
+                    });
+                }
+            }).continueWith((Continuation<Route, Void>) task2 -> {
+                if (task1.isFaulted()) {
+                    Log.e(LOG_TAG, board.isConnected() ? "Error setting up route" : "Error connecting", task1.getError());
+                } else {
+                    Log.i(LOG_TAG, "Connected");
+                    metaConnect = true;
+                    debug = board.getModule(Debug.class);
+                    logging = board.getModule(Logging.class);
+                    checkDependencies();
+                }
+                return null;
+            });
         });
-//The other one
-//        if(board.getModel()!=null){
-//
-//            Log.i("MetawearBoard", "board is " + String.valueOf(board.getModel()));
-//        }
-//        else{
-//            Log.i("MetawearBoard", "board is null");
-//        }
-//
-//        //Log.i ("MetawearBoard", String.valueOf(board.isConnected()));
-//        //Log.i("MetawearBoard", "in Retrieve Board after getModel() call");
-//
-//        // Establishes a BLE connection to MetaWear board
-//        board.connectAsync().onSuccessTask(task -> {
-//            @Override
-//            public Void then(Task <Void> task) throws Exception {
-//                Log.i("ShowerTunes", task.toString());
-//                Log.i("ShowerTunes", "Connected to " + META_ADDR);
-//
-//                logging = board.getModule(Logging.class);
-//
-//                // create a reference to the temperature sensor on the board
-//                final Temperature temp = board.getModule(Temperature.class);
-//
-//                final Temperature.Sensor tempSensor = temp.findSensors(Temperature.SensorType.PRESET_THERMISTOR)[0];
-//
-//                board.getModule(BarometerBosch.class).start();
-//                temp.findSensors(Temperature.SensorType.BOSCH_ENV)[0].read();
-//
-//                tempSensor.addRouteAsync(new RouteBuilder() {
-//                    @Override
-//                    public void configure(RouteComponent source) {
-//                        source.stream(new Subscriber() {
-//                            @Override
-//                            public void apply(Data data, Object ... env) {
-//                                Log.i("MainActivity", "Temperature (C) = " + data.value(Float.class));
-//                            }
-//                        });
-//                    }
-//                }).continueWith(new Continuation<Route, Void>() {
-//                    @Override
-//                    public Void then(Task<Route> task) throws Exception {
-//                        tempSensor.read();
-//                        return null;
-//                    }
-//                });
-//                return null;
-//            }
-//        });
     }
-
 }
+
