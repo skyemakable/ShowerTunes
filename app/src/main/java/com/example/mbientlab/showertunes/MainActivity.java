@@ -83,10 +83,10 @@ public class MainActivity extends Activity implements ServiceConnection {
         setContentView(R.layout.activity_main);
 
         // Bind UI elements
-        MusicText = (TextView) findViewById(R.id.MusicText);
         Metawear = (ImageView) findViewById(R.id.Metawear);
         BluetoothSpeaker = (ImageView) findViewById(R.id.BluetoothSpeaker);
         AlbumArt = (ImageView) findViewById(R.id.AlbumArt);
+        MusicText = (TextView) findViewById(R.id.MusicText);
 
         // Bind media player
         mediaPlayer = mediaPlayer.create(getApplicationContext(), R.raw.song); // TODO: Black Betty by Ram Jam
@@ -154,6 +154,7 @@ public class MainActivity extends Activity implements ServiceConnection {
      */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
+
         // Typecast the binder to the service's LocalBinder class
         serviceBinder = (BtleService.LocalBinder) service;
         Log.i("metawear", serviceBinder.toString());
@@ -272,17 +273,18 @@ public class MainActivity extends Activity implements ServiceConnection {
      * song when parameters are not met. 
      */
     private void toggleMusic(boolean setToggle) {
-        MusicText.setText("Regina Spektor - \"Eet\" ");
-        AlbumArt.setImageResource(R.drawable.image);
 
         if (setToggle) {
-
+            MusicText.setText("Regina Spektor - \"Eet\" ");
+            AlbumArt.setImageResource(R.drawable.image);
             mediaPlayer.start();
             Log.d("Play start", "Yeeeeeeettttthhhhh");
         }
         else {
             // mediaPlayer.stop();
-            if (mediaPlayer.isPlaying()) mediaPlayer.pause();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+            }
         }
     }
 
@@ -290,17 +292,9 @@ public class MainActivity extends Activity implements ServiceConnection {
      *  Get board information, do the binding, get temperature data. Will add more comments when it works.
      */
     public void retrieveBoard(String META_ADDR) {
-        // TODO: put in better place
-        metaConnect = true;
-        checkDependencies();
-        Metawear.setAlpha(1.0f);
-
-        // TODO: remove early return
-        if (true) return;
-
         // btManager manages bluetooth connection
         final BluetoothManager btManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+                (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
 
         // gets remote device
         Log.i("bluetooth", "Getting remote device: " + btManager.getAdapter().getRemoteDevice(META_ADDR).toString());
@@ -311,14 +305,9 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // create a new Metawear board object for the Bluetooth device
         board = serviceBinder.getMetaWearBoard(remoteDevice);
-//        Log.i("MetawearBoard", "in Retrieve Board: before getModel() call");
-//        Log.i("MetawearBoard", board.getModel().toString());
-//        Log.i("MetawearBoard", "in Retrieve Board: after getModel() call");
-        Log.i("MetawearBoard", "Is board connected? (T/F): " + String.valueOf(board.isConnected()));
 
         // This section of text is for testing with accelerometer sensor
         board.connectAsync().onSuccessTask(task -> {
-            Log.i("MetawearBoard", "I made it this far");
             accelerometer = board.getModule(Accelerometer.class);
 
             accelerometer.configure()
