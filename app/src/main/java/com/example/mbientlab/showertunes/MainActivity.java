@@ -13,7 +13,6 @@ import android.content.ServiceConnection;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-//import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.ImageView;
@@ -26,22 +25,15 @@ import com.mbientlab.metawear.Subscriber;
 import com.mbientlab.metawear.android.BtleService;
 import com.mbientlab.metawear.builder.RouteBuilder;
 import com.mbientlab.metawear.builder.RouteComponent;
+import com.mbientlab.metawear.module.Timer;
 
-import com.mbientlab.metawear.builder.filter.Comparison;
-import com.mbientlab.metawear.builder.filter.ThresholdOutput;
-import com.mbientlab.metawear.builder.function.Function1;
-import com.mbientlab.metawear.module.BarometerBosch;
-import com.mbientlab.metawear.module.Logging;
 import com.mbientlab.metawear.module.Temperature;
-import com.mbientlab.metawear.module.Temperature.SensorType;
 
 
 import bolts.Continuation;
 import bolts.Task;
 
 
-import com.mbientlab.metawear.module.Accelerometer;
-import com.mbientlab.metawear.module.Debug;
 public class MainActivity extends Activity implements ServiceConnection {
 
     private static final String TAG = "MainActivity";
@@ -58,13 +50,13 @@ public class MainActivity extends Activity implements ServiceConnection {
     private BluetoothAdapter mBluetoothAdapter;
     private MetaWearBoard board;
     private Temperature tempModule;
+    private Timer timerModule;
+    private Timer.ScheduledTask scheduledTask;
 
     private boolean btActive;
     private boolean btSpeakerConnect;
     private boolean metaConnect;
 
-    private Logging logging;
-    private Debug debug;
 
     /**
      * onCreate
@@ -311,23 +303,37 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         board.connectAsync().onSuccessTask(task1 -> {
             tempModule = board.getModule(Temperature.class);
+            timerModule= board.getModuleOrThrow(Timer.class);
             final Temperature.Sensor tempSensor = tempModule.sensors()[0];
             //addrouteasync fails
-            tempSensor.addRouteAsync(source -> source.stream((data, env) -> {
-                final Float celsius = data.value(Float.class);
-                Log.i(LOG_TAG, "Temperature (C) = " + celsius);
-
-            })).continueWithTask(task -> {
-                //streamRoute = task.getResult();
-                if (task.isFaulted()) {
-                    Log.e(LOG_TAG, board.isConnected() ? "Error setting up route" : "Error connecting", task.getError());
-                } else {
-                    Log.i(LOG_TAG, "Connected");
-                    metaConnect = true;
-                    debug = board.getModule(Debug.class);
-                    logging = board.getModule(Logging.class);
-                    checkDependencies();
+            Log.i(LOG_TAG, "Fetched module done" + tempSensor.toString());
+            tempSensor.addRouteAsync(new RouteBuilder() {
+                @Override
+                public void configure(RouteComponent source) {
+                    source.stream(new Subscriber() {
+                        @Override
+                        public void apply(Data data, Object... env) {
+                            Log.i(LOG_TAG, "Temperature(C) = " + data.value(Float.class));
+                            // This is called every 5 seconds, look here for threshold value
+                            // timerModule.scheduleAsync(5000, false, tempSensor::read);
+                        }
+                    });
                 }
+            }).continueWith(new Continuation<Route, Void>() {
+                @Override
+                public Void then(Task<Route> task) throws Exception {
+                    tempSensor.read();
+                    timerModule.scheduleAsync(5000, false, tempSensor::read);
+                    // Log.i(LOG_TAG, "Temperature(C) = " + data.value(Float.class))
+                    return null;
+                }
+            }).continueWithTask(task -> {
+                //streamRoute = task.getResult();
+
+                return timerModule.scheduleAsync(5000, false, tempSensor::read);
+            }).continueWithTask(task -> {
+                scheduledTask = task.getResult();
+                scheduledTask.start();
 
                 return null;
             });
