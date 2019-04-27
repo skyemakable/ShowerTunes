@@ -39,11 +39,13 @@ public class MainActivity extends Activity implements ServiceConnection {
     private static final String TAG = "MainActivity";
     private final String META_ADDR = "F7:02:E6:49:04:AF";
     private final String SPEAKER_ADDR = "00:58:02:A8:02:44";
+    private final float bounds = 35.0f;
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
     private ImageView AlbumArt;
     private TextView MusicText;
+    private TextView TempText;
 
     private MediaPlayer mediaPlayer;
     private BtleService.LocalBinder serviceBinder;
@@ -56,6 +58,7 @@ public class MainActivity extends Activity implements ServiceConnection {
     private boolean btActive;
     private boolean btSpeakerConnect;
     private boolean metaConnect;
+    private boolean metaTemp;
 
 
     /**
@@ -78,6 +81,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         BluetoothSpeaker = (ImageView) findViewById(R.id.BluetoothSpeaker);
         AlbumArt = (ImageView) findViewById(R.id.AlbumArt);
         MusicText = (TextView) findViewById(R.id.MusicText);
+        TempText = (TextView) findViewById(R.id.TempText);
 
         // Bind media player
         mediaPlayer = mediaPlayer.create(getApplicationContext(), R.raw.song); // TODO: Black Betty by Ram Jam
@@ -214,7 +218,6 @@ public class MainActivity extends Activity implements ServiceConnection {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            btSpeakerConnect = false;
 
             Log.d("BluetoothDevice", action);
 
@@ -222,12 +225,14 @@ public class MainActivity extends Activity implements ServiceConnection {
                 // Get BluetoothDevice object from the intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
-                btSpeakerConnect = true;
+                if (device.getAddress().equals(SPEAKER_ADDR)) btSpeakerConnect = true;
+                else if (device.getAddress().equals(META_ADDR)) metaConnect = true;
             } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 // Get BluetoothDevice object from the intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d("BluetoothDevice", device.toString());
-                btSpeakerConnect = false;
+                if (device.getAddress().equals(SPEAKER_ADDR)) btSpeakerConnect = false;
+                else if (device.getAddress().equals(META_ADDR)) metaConnect = false;
             }
 
             checkDependencies();
@@ -253,7 +258,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
         // Function to check btSpeaker and metawear are connected
         // If both are connected, play music.
-        if (btActive && btSpeakerConnect && metaConnect) {
+        if (btActive && btSpeakerConnect && metaConnect && metaTemp) {
             Log.d("Play", "Yep");
             toggleMusic(true);
         } else {
@@ -315,7 +320,10 @@ public class MainActivity extends Activity implements ServiceConnection {
                         public void apply(Data data, Object... env) {
                             Log.i(LOG_TAG, "Temperature(C) = " + data.value(Float.class));
                             // This is called every 5 seconds, look here for threshold value
-                            // timerModule.scheduleAsync(5000, false, tempSensor::read);
+                            metaTemp = data.value(Float.class) >= bounds;
+                            TempText.setText(String.format("%.1f°C", data.value(Float.class)));
+
+                            checkDependencies();
                         }
                     });
                 }
@@ -328,8 +336,6 @@ public class MainActivity extends Activity implements ServiceConnection {
                     return null;
                 }
             }).continueWithTask(task -> {
-                //streamRoute = task.getResult();
-
                 return timerModule.scheduleAsync(5000, false, tempSensor::read);
             }).continueWithTask(task -> {
                 scheduledTask = task.getResult();
