@@ -212,7 +212,7 @@ public class MainActivity extends Activity implements ServiceConnection {
 
     /**
      * Broadcast receiver looking for any newly added bluetooth devices. When Bluetooth speaker is turned on, this will
-     * Listen for it.
+     * Listen for it. Same for the Metawear device. It compares the MAC address of the new device for a desired device
      */
     private final BroadcastReceiver deviceReceiver = new BroadcastReceiver() {
         @Override
@@ -234,7 +234,6 @@ public class MainActivity extends Activity implements ServiceConnection {
                 if (device.getAddress().equals(SPEAKER_ADDR)) btSpeakerConnect = false;
                 else if (device.getAddress().equals(META_ADDR)) metaConnect = false;
             }
-
             checkDependencies();
         }
     };
@@ -257,7 +256,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         }
 
         // Function to check btSpeaker and metawear are connected
-        // If both are connected, play music.
+        // If both are connected and temperature is of certain threshold, play music.
         if (btActive && btSpeakerConnect && metaConnect && metaTemp) {
             Log.d("Play", "Yep");
             toggleMusic(true);
@@ -289,7 +288,8 @@ public class MainActivity extends Activity implements ServiceConnection {
 
     /**
      * retrieveBoard
-     * Get board information, do the binding, get temperature data. Will add more comments when it works.
+     * Get board information, do the binding, get temperature data. Temperature data is read every 5 seconds.
+     * Temperature being read is outputted into a TextView. Bounds variable used to compare temperature against.
      */
     public void retrieveBoard(String META_ADDR) {
         // btManager manages bluetooth connection
@@ -310,7 +310,7 @@ public class MainActivity extends Activity implements ServiceConnection {
             tempModule = board.getModule(Temperature.class);
             timerModule= board.getModuleOrThrow(Timer.class);
             final Temperature.Sensor tempSensor = tempModule.sensors()[0];
-            //addrouteasync fails
+
             Log.i(LOG_TAG, "Fetched module done" + tempSensor.toString());
             tempSensor.addRouteAsync(new RouteBuilder() {
                 @Override
@@ -321,6 +321,7 @@ public class MainActivity extends Activity implements ServiceConnection {
                             Log.i(LOG_TAG, "Temperature(C) = " + data.value(Float.class));
                             // This is called every 5 seconds, look here for threshold value
                             metaTemp = data.value(Float.class) >= bounds;
+                            // This portion sets the text above the Metawear icon to the read Celsius temperature
                             TempText.setText(String.format("%.1f°C", data.value(Float.class)));
 
                             checkDependencies();
@@ -331,11 +332,12 @@ public class MainActivity extends Activity implements ServiceConnection {
                 @Override
                 public Void then(Task<Route> task) throws Exception {
                     tempSensor.read();
+                    // Keep reading temperature
                     timerModule.scheduleAsync(5000, false, tempSensor::read);
-                    // Log.i(LOG_TAG, "Temperature(C) = " + data.value(Float.class))
                     return null;
                 }
             }).continueWithTask(task -> {
+                // Return the read temperature
                 return timerModule.scheduleAsync(5000, false, tempSensor::read);
             }).continueWithTask(task -> {
                 scheduledTask = task.getResult();
