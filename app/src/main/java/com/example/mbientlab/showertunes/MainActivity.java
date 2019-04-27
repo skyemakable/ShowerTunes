@@ -37,9 +37,9 @@ import bolts.Task;
 public class MainActivity extends Activity implements ServiceConnection {
 
     private static final String TAG = "MainActivity";
-    private final String META_ADDR = "F7:02:E6:49:04:AF";
-    private final String SPEAKER_ADDR = "00:58:02:A8:02:44";
-    private final float bounds = 35.0f;
+    private final String META_ADDR = "F7:02:E6:49:04:AF"; // <- Your Metawear mac address here
+    private final String SPEAKER_ADDR = "00:58:02:A8:02:44"; // <- Your Bluetooth Speaker address here
+    private final float bounds = 35.0f; // <- Your threshold in Celsius here
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
@@ -84,7 +84,7 @@ public class MainActivity extends Activity implements ServiceConnection {
         TempText = (TextView) findViewById(R.id.TempText);
 
         // Bind media player
-        mediaPlayer = mediaPlayer.create(getApplicationContext(), R.raw.song); // TODO: Black Betty by Ram Jam
+        mediaPlayer = mediaPlayer.create(getApplicationContext(), R.raw.song);
 
         // Set opacity for both speaker and metawear icons to low
         BluetoothSpeaker.setAlpha(0.1f);
