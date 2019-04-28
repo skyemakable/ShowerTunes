@@ -90,7 +90,7 @@ From the above described user stories, most of the configuration and coding for 
 
 ### Getting Started
 1. Install Android Studio on available PC
-2. Go to [Github](https://github.com/skyemakable/ShowerTunes/tree/codestuff) repository for ShowerTunes  
+2. Go to [Github](https://github.com/skyemakable/ShowerTunes/tree/codestuff) repository for ShowerTunes, the 'codestuff' branch.
 
     * If Github Desktop is avilable on available PC, select to open in Desktop.
     *  Else, download ZIP of repo. Extract files to desired location on PC. Skip to step 4.
