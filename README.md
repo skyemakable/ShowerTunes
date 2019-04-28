@@ -78,7 +78,35 @@ The Bluetooth speaker will be the output that presents the ShowerTunes. It will 
 
 From the above described user stories, most of the configuration and coding for the Bluetooth speaker has been achieved. This was achieved with libraries such as [BluetoothAdapter](https://developer.android.com/reference/android/bluetooth/BluetoothAdapter), [BluetoothDevice](https://developer.android.com/reference/android/bluetooth/BluetoothDevice), [BluetoothManager](https://developer.android.com/reference/android/bluetooth/BluetoothManager), [BroadcastReceiver](https://developer.android.com/reference/android/content/BroadcastReceiver), and [MediaPlayer](https://developer.android.com/reference/android/media/MediaPlayer) among others. At this time, the metawear portion still needs to be fully written and tested, but the app is at a point where it can fulfill the user stories. Where the app is now, when opened, it will listen and wait for connection with the Bluetooth speaker, and when turned on and connected, will start playing a local song. 
 
-I'm crossing my fingers the demo section goes well. 
+## Installation Instructions
+
+### Hardware Requirements  
+* Android Phone running Android 9.0
+* MetaWear Device with temperature sensor
+* Generic Bluetooth Speaker  
+
+### Software Requirements
+* Android Studio
+
+### Getting Started
+1. Install Android Studio on available PC
+2. Go to [Github](https://github.com/skyemakable/ShowerTunes/tree/codestuff) repository for ShowerTunes  
+
+    * If Github Desktop is avilable on available PC, select to open in Desktop.
+    *  Else, download ZIP of repo. Extract files to desired location on PC. Skip to step 4.
+3. On Github Desktop, make sure the 'codestuff' branch is the current branch, and select to fetch origin. Select to show in Explorer (or the equivalent for a Mac machine).
+
+4. Copy contents of address bar in the explorer window and copy contents (Ex: C:\Documents\GitHub\ShowerTunes\app). 
+
+5. Open Android Studio, File -> Open. In the search bar, paste the what was copied from the address bar and click OK. 
+
+6. Navigate to app -> java -> com.example.mbientlab.showertunes -> MainActivity
+
+7. Where comments present on lines 40-42, edit the addresses for available MetaWear device, Bluetooth Speaker, and chosen threshold (note: bounds is for Celsius). 
+
+8. Click the play icon to install APK on Android phone (have Android phone connected )
+
+9. Turn on Bluetooth speaker and insert battery into MetaWear device. Wait until threshold is met.
 
 
 
