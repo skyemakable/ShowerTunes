@@ -39,7 +39,7 @@ public class MainActivity extends Activity implements ServiceConnection {
     private static final String TAG = "MainActivity";
     private final String META_ADDR = "F7:02:E6:49:04:AF"; // <- Your Metawear mac address here
     private final String SPEAKER_ADDR = "00:58:02:A8:02:44"; // <- Your Bluetooth Speaker address here
-    private final float bounds = 35.0f; // <- Your threshold in Celsius here
+    private final float bounds = 25.0f; // <- Your threshold in Celsius here
 
     private ImageView Metawear;
     private ImageView BluetoothSpeaker;
